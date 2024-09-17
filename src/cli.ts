@@ -102,9 +102,9 @@ readFile(file)
         instance.addHandler("input", inputDevice);
         instance.addHandler("output", outputDevice);
 
-        const startTime = (new Date).getMilliseconds();
+        const startTime = (new Date).getTime();
         await instance.interpret(code);
-        console.log(`Time taken: ${(new Date).getMilliseconds() - startTime}ms`);
+        console.log(`Time taken: ${(new Date).getTime() - startTime}ms`);
         std.exit(0);
     })
     .catch((err) => {
