@@ -20,8 +20,8 @@ build: clean
 	@echo "  Building TypeScript..."
 	@tsc -p . --outDir "$(TEMP_DIR)" || { echo "TypeScript build failed" ; exit 1 ; }
 	@echo "  Bundling..."
-	@cd $(TEMP_DIR) \
-		&& npx browserify cli.js -o index.js && \
+	@cd $(TEMP_DIR); \
+		npx browserify cli.js -o index.js ; \
 		mv ./index.js ../interpreter.js || { echo "Bundling failed" ; exit 1 ; }
 	@echo "Done"
 	@rm -rf $(TEMP_DIR)
@@ -45,8 +45,8 @@ compile: build
 # Test the compiled output
 test: build
 	@echo "Running test..."
-	@OUTPUT='$(shell qjs --std ./dist/interpreter.js -r ./test/sample-code.asm | head -n 1 | tr -d '[:space:]')' && \
-	EXPECTED="(0x0f,15,0b00001111)" && \
+	@OUTPUT='$(shell qjs --std ./dist/interpreter.js -r ./test/sample-code.asm | head -n 1 | tr -d '[:space:]')' ; \
+	EXPECTED="(0x0f,15,0b00001111)" ; \
 	if [ "$$OUTPUT" = "$$EXPECTED" ]; then \
 		echo "Test Passed."; \
 	else \
