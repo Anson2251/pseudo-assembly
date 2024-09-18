@@ -11,12 +11,10 @@
   },
   "devDependencies": {
     "@types/quickjs": "github:Gottox/quickjs-dts",
-    "browserify": "^17.0.0"
+    "browserify": "^17.0.0",
+    "vitest": "^2.1.1"
   },
   "author": "Heyan Zhu",
   "license": "Apache-2.0",
-  "private": true,
-  "dependencies": {
-    "vitest": "^2.1.1"
-  }
+  "private": true
 }
