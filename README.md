@@ -20,7 +20,9 @@ A toy project for running the Assembly language shown in *Cambridge Internationa
 
 - 2. `npm run build`
 
-- 3. The bundled js file can be found in the folder `dist/`. It should be run in the QuickJS environment.
+    To get the single executable file, run `npm run compile`.
+
+- 3. The bundled js file (executable file) can be found in the folder `dist/`. It should be run in the QuickJS environment.
 
 ## Machine Instruction Set Documentation
 
