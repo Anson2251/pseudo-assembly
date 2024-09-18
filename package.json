@@ -5,9 +5,9 @@
   "description": "A toy project for learning Assembly language",
   "main": "index.ts",
   "scripts": {
-    "build": "bash ./scripts/build.sh",
-    "test": "bash ./scripts/test.sh",
-    "compile": "bash ./scripts/compile.sh"
+    "build": "make build",
+    "test": "make test",
+    "compile": "make compile"
   },
   "devDependencies": {
     "@types/quickjs": "github:Gottox/quickjs-dts",
