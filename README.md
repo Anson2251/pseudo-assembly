@@ -1,28 +1,48 @@
 # Assembly Interpreter (Core)
 
-A toy project for running the Assembly language shown in *Cambridge International AS and A Levels Computer Science Coursebook (Hodder Education)*
+A toy project for running the assembly language examples shown in the *Cambridge International AS and A Levels Computer Science Coursebook (Hodder Education)*.
 
 ## Build Instructions
 
-### Prerequisite
+### Prerequisites
 
-- [`node.js`](https://nodejs.org/)
+- [`Node.js`](https://nodejs.org/)
 
-- [`make`](https://www.gnu.org/software/make/)
+- [`Make`](https://www.gnu.org/software/make/)
 
-- [`QuickJS`](https://bellard.org/quickjs/) (Optional, runtime and needed by compiling into an executable)
+- [`QuickJS`](https://bellard.org/quickjs/) (optional, but required for running the CLI and compiling into an executable)
 
-    Binary builds can be found at [quickjs-build repo](https://github.com/napi-bindings/quickjs-build)
+    QuickJS is a lightweight JavaScript interpreter written in C, designed for minimal size and fast startup. You can find it in [Fabrice Bellard's repo](https://github.com/bellard/quickjs).
+
+    Binary builds can be found at the [quickjs-build repo](https://github.com/napi-bindings/quickjs-build).
+
+    > Please note that the executable `quickjs` in the release is equivalent to `qjs`, which is used by this project. You may need to rename it to `qjs` for the Makefile to run properly.
 
 ### Steps
 
-- 1. `npm install`
+1. Install dependencies:
 
-- 2. `npm run build`
+    ```bash
+    npm install
+    ```
 
-    To get the single executable file, run `npm run compile`.
+2. Build the project:
 
-- 3. The bundled js file (executable file) can be found in the folder `dist/`. It should be run in the QuickJS environment.
+    ```bash
+    npm run build
+    # or
+    make build
+    ```
+
+    To create a single executable file, use:
+
+    ```bash
+    npm run compile
+    # or
+    make compile
+    ```
+
+3. The bundled JavaScript file (or executable) can be found in the `dist/` folder. It should be run in the QuickJS environment.
 
 ## Machine Instruction Set Documentation
 
@@ -47,7 +67,7 @@ A toy project for running the Assembly language shown in *Cambridge Internationa
 ### Arithmetic Mnemonics
 | Mnemonic          | Opcode | Description |
 |-------------------|--------|-------------|
-| `ADD`             | 0x20   | Add the contents of the specified address to ACC (direct/absolute addressing) |
+| `ADD`             | 0x20   | Add the contents of the specified address to ACC |
 | `ADD`             | 0x21   | (overload) Add the denary number n to ACC (immediate addressing) |
 | `SUB`             | 0x22   | Subtract the contents of the specified address from ACC |
 | `SUB`             | 0x23   | (overload) Subtract the number n from ACC (immediate addressing) |
@@ -69,5 +89,7 @@ A toy project for running the Assembly language shown in *Cambridge Internationa
 | `CMP`             | 0x40   | Compare ACC with contents of the specified address (direct/absolute addressing) |
 | `CMP`             | 0x41   | (overload) Compare ACC with the number n (immediate addressing) |
 | `CMI`             | 0x42   | Compare ACC with contents of the contents of the specified address (indirect addressing) |
+
+---
 
 Last update: 2024-09-18
