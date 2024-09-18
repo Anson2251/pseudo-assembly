@@ -8,7 +8,7 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
 - [`Node.js`](https://nodejs.org/)
 
-- [`Make`](https://www.gnu.org/software/make/)
+- [`Make`](https://www.gnu.org/software/make/) (required for bundling & compiling, command `npm run build-only` does not depend on it)
 
 - [`QuickJS`](https://bellard.org/quickjs/) (optional, but required for running the CLI and compiling into an executable)
 
@@ -40,6 +40,12 @@ A toy project for running the assembly language examples shown in the *Cambridge
     npm run compile
     # or
     make compile
+    ```
+
+    If you wish to build the TypeScript files only, you can use:
+
+    ```bash
+    npm run build-only
     ```
 
 3. The bundled JavaScript file (or executable) can be found in the `dist/` folder. It should be run in the QuickJS environment.
