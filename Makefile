@@ -45,7 +45,7 @@ compile: build
 # Test the compiled output
 test: build
 	@echo "Running test..."
-	@OUTPUT='$(shell qjs --std ./dist/interpreter.js -r ./test/test.asm | head -n 1 | tr -d '[:space:]')' && \
+	@OUTPUT='$(shell qjs --std ./dist/interpreter.js -r ./test/sample-code.asm | head -n 1 | tr -d '[:space:]')' && \
 	EXPECTED="(0x0f,15,0b00001111)" && \
 	if [ "$$OUTPUT" = "$$EXPECTED" ]; then \
 		echo "Test Passed."; \
