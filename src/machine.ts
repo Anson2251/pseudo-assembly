@@ -242,7 +242,7 @@ export class machine {
         console.log("---MEMORY-BEGIN---")
 
         const keys = Object.keys(this.memory).map(i => parseInt(i)).sort((a, b) => a - b);
-        for (let i = 0; i < keys.length; i += 5) {
+        for (let i = 0; i < keys.length; i += 8) {
             console.log(`${(Math.floor(i / 8) * 8).toString().padStart(keys.length.toString().length, " ")} | ${keys.slice(i, i + 5).map(val => "0x" + this.memory[val].toString(16).padStart(this.bits / 4, "0") ).join(" ")}`);
         }
         console.log("----MEMORY-END----")
