@@ -14,7 +14,7 @@ suite('Interpreter-Core-Machine - Arithmetic Instructions', () => {
       ];
   
       await vm.execute(instructions);
-      const accValue = vm.registers.ACC.getVal();
+      const accValue = vm.registers.ACC.getValue();
       expect(accValue).toBe(5); // 2 + 3 = 5
     });
   
@@ -28,7 +28,7 @@ suite('Interpreter-Core-Machine - Arithmetic Instructions', () => {
       ];
   
       await vm.execute(instructions);
-      const accValue = vm.registers.ACC.getVal();
+      const accValue = vm.registers.ACC.getValue();
       expect(accValue).toBe(3); // 4 - 1 = 3
     });
   });

@@ -17,7 +17,7 @@ suite('Interpreter-Core-Machine - Jump Instructions', () => {
     vm.verbose = false;
 
     await vm.execute(instructions);
-    expect(vm.registers.ACC.getVal()).toBe(2); // if it didn't jump, it would be 3
+    expect(vm.registers.ACC.getValue()).toBe(2); // if it didn't jump, it would be 3
   });
 
   it('should jump to a give address (JPE)', async () => {
@@ -34,6 +34,6 @@ suite('Interpreter-Core-Machine - Jump Instructions', () => {
     vm.verbose = false;
 
     await vm.execute(instructions);
-    expect(vm.registers.ACC.getVal()).toBe(5); // if it didn't jump, it would be 6
+    expect(vm.registers.ACC.getValue()).toBe(5); // if it didn't jump, it would be 6
   });
 });

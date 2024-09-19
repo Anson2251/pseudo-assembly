@@ -29,15 +29,19 @@ export class register {
         this.bits = bits;
     }
 
-    setVal(value: number) {
+    setValue(value: number) {
         let bin = value.toString(2);
         bin = bin.length > this.bits ? bin.slice(-this.bits) : bin.padStart(this.bits, "0");
         value = parseInt(bin, 2);
         this.value = value;
     }
 
-    getVal() {
+    getValue() {
         return this.value;
+    }
+
+    increaseBy(value: number) {
+        this.setValue(this.getValue() + value); // use the previous implementation to handle the overflow
     }
 
     /**

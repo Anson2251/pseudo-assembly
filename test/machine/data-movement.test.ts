@@ -11,7 +11,7 @@ suite('Interpreter-Core-Machine - Data Movement Instructions', () => {
     ];
 
     await vm.execute(instructions);
-    const accValue = vm.registers.ACC.getVal(); // Access ACC register
+    const accValue = vm.registers.ACC.getValue(); // Access ACC register
     expect(accValue).toBe(10);
   });
 
@@ -25,7 +25,7 @@ suite('Interpreter-Core-Machine - Data Movement Instructions', () => {
     ];
 
     await vm.execute(instructions);
-    const ixValue = vm.registers.IX.getVal(); // Access IX register
+    const ixValue = vm.registers.IX.getValue(); // Access IX register
     expect(ixValue).toBe(10);
   });
 

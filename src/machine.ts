@@ -14,6 +14,7 @@ export class machine {
     private bits: number;
     private memory: Record<number, number> = {};
     private end: boolean = true;
+    private jumped: boolean = false;
     private inputDevice: () => Promise<number>
     private outputDevice: (value: number) => Promise<void>
     verbose: boolean = false
@@ -102,7 +103,32 @@ export class machine {
         let bin = value.toString(2);
         bin = bin.length > this.bits ? bin.slice(-this.bits) : bin.padStart(this.bits, "0");
         value = parseInt(bin, 2); // deal with overflow
-        this.memory[address] = value;
+        
+        this.registers.MAR.setValue(address);
+        this.registers.MDR.setValue(value);
+        this.writeMemory();
+    }
+
+    /**
+     * Writes the value stored in the MDR (Memory Data Register) to the memory address stored in the MAR (Memory Address Register).
+     * 
+     * If the value in the MDR is undefined, it will be treated as zero.
+     */
+    writeMemory(){
+        const data = this.registers.MDR.getValue() || 0;
+        const address = this.registers.MAR.getValue();
+        this.memory[address] = data;
+    }
+
+    /**
+     * Reads the value at the memory address stored in the MAR (Memory Address Register) and stores it in the MDR (Memory Data Register).
+     * 
+     * If the address is not in memory, the value in the MDR will be set to zero.
+     */
+    fetchMemory() {
+        const address = this.registers.MAR.getValue();
+        const data = this.memory[address] || 0;
+        this.registers.MDR.setValue(data);
     }
 
     /**
@@ -113,7 +139,9 @@ export class machine {
      * @returns The value at the given address, or 0 if it is not in memory.
      */
     readMemory(address: number) {
-        return this.memory[address] || 0;
+        this.registers.MAR.setValue(address);
+        this.fetchMemory();
+        return this.registers.MDR.getValue();
     }
 
     /**
@@ -185,11 +213,20 @@ export class machine {
             }
         })
 
-        this.registers.PC.setVal(0);
+        this.registers.PC.setValue(0);
         this.end = false;
 
+        this.logMemoryAndRegisters();
+
         while (!this.end) {
-            await this.executeInstruction(this.registers.PC.getVal());
+            const instruction = this.fetchDecodeInstruction(this.registers.PC.getValue());
+            this.registers.CIR.setValue(instruction.opcode);
+            this.registers.MDR.setValue(instruction.operand);
+
+            await this.executeInstruction();
+            if(this.jumped) this.jumped = false;
+            else this.registers.PC.increaseBy(2);
+
             this.logMemoryAndRegisters();
             if (this.verbose) console.log("");
         }
@@ -203,14 +240,16 @@ export class machine {
     logMemoryAndRegisters() {
         if (!this.verbose) return;
         console.log("---MEMORY-BEGIN---")
-        Object.keys(this.memory).map(i => parseInt(i)).sort((a, b) => a - b).forEach((index) => {
-            console.log(`${index} | 0x${this.memory[index].toString(16).padStart(this.bits / 4, "0")}`);
-        });
+
+        const keys = Object.keys(this.memory).map(i => parseInt(i)).sort((a, b) => a - b);
+        for (let i = 0; i < keys.length; i += 5) {
+            console.log(`${(Math.floor(i / 8) * 8).toString().padStart(keys.length.toString().length, " ")} | ${keys.slice(i, i + 5).map(val => "0x" + this.memory[val].toString(16).padStart(this.bits / 4, "0") ).join(" ")}`);
+        }
         console.log("----MEMORY-END----")
 
         console.log("--REGISTER-BEGIN--")
         Object.keys(this.registers).forEach((key) => {
-            console.log(`${key.padStart(3, " ")}: (0x${this.registers[key as RegisterNameType].getVal().toString(16)}, ${this.registers[key as RegisterNameType].getVal().toString(10)}, 0b${this.registers[key as RegisterNameType].getVal().toString(2).padStart(this.bits, "0")})`);
+            console.log(`${key.padStart(3, " ")}: (0x${this.registers[key as RegisterNameType].getValue().toString(16)}, ${this.registers[key as RegisterNameType].getValue().toString(10)}, 0b${this.registers[key as RegisterNameType].getValue().toString(2).padStart(this.bits, "0")})`);
         })
         console.log("---REGISTER-END---")
     }
@@ -222,8 +261,8 @@ export class machine {
      * @param instruction The instruction to store.
      */
     storeInstructionInMemory(address: number, instruction: instructionPieceType) {
-        this.memory[address] = instruction.opcode;
-        this.memory[address + 1] = instruction.operand;
+        this.setMemory(address, instruction.opcode);
+        this.setMemory(address + 1, instruction.operand);
     }
 
     /**
@@ -236,8 +275,8 @@ export class machine {
     private fetchDecodeInstruction(address: number): instructionPieceType {
         if (this.verbose) console.log("Fetching instruction at address", address)
         const decoded: instructionPieceType = {
-            opcode: this.memory[address],
-            operand: this.memory[address + 1]
+            opcode: this.readMemory(address),
+            operand: this.readMemory(address + 1)
         }
         if(decoded.opcode === undefined || decoded.operand === undefined) throw new Error("Fail to fetch instruction at address " + address);
         if (this.verbose) console.log(`Decoded: [OPCODE: ${lookUpMnemonic(decoded.opcode)}(0x${decoded.opcode.toString(16).padStart(2, "0")}), OPERAND:(0x${decoded.operand.toString(16).padStart(this.bits / 4, "0")}, ${decoded.operand.toString(10)}, 0b${decoded.operand.toString(2).padStart(this.bits, "0")})]`)
@@ -252,123 +291,125 @@ export class machine {
      * 
      * @param address The address of the instruction to execute.
      */
-    async executeInstruction(address: number) {
+    async executeInstruction() {
         this.end = false;
-        const instruction = this.fetchDecodeInstruction(address);
-        let flagJumped = false;
+        const instruction = {
+            opcode: this.registers.CIR.getValue(),
+            operand: this.registers.MDR.getValue()
+        };
         switch (instruction.opcode) {
             // Data Move
             case MNEMONIC_DATA_MOVE.LDM: {
                 // Load the number into ACC (immediate addressing)
-                this.registers.ACC.setVal(instruction.operand);
+                this.registers.ACC.setValue(instruction.operand);
                 break;
             }
             case MNEMONIC_DATA_MOVE.LDD: {
                 // Load the contents of the specified address into ACC (direct/absolute addressing)
-                this.registers.ACC.setVal(this.readMemory(instruction.operand));
+                this.registers.ACC.setValue(this.readMemory(instruction.operand));
                 break;
             }
             case MNEMONIC_DATA_MOVE.LDI: {
                 // Load the contents of the contents of the given address into ACC (indirect addressing)
                 const location = this.readMemory(instruction.operand);
-                this.registers.ACC.setVal(this.readMemory(location));
+                this.registers.ACC.setValue(this.readMemory(location));
                 break;
             }
             case MNEMONIC_DATA_MOVE.LDX: {
                 // Load the contents of the calculated address into ACC (indexed addressing)
-                const calculatedAddress = instruction.operand + this.registers.IX.getVal();
-                this.registers.ACC.setVal(this.readMemory(calculatedAddress));
+                const calculatedAddress = instruction.operand + this.registers.IX.getValue();
+                this.registers.ACC.setValue(this.readMemory(calculatedAddress));
                 break;
             }
             case MNEMONIC_DATA_MOVE.LDR: {
                 // Load the number n into IX (immediate addressing is used)
-                this.registers.IX.setVal(instruction.operand);
+                this.registers.IX.setValue(instruction.operand);
                 break;
             }
             // I DO NOT KNOW WHY HODDER EDUCATION'S BOOK USES `LDR ACC` COMMAND EVEN IF `MOV ACC` IS ALSO USED
             case MNEMONIC_DATA_MOVE.LDR_ACC: {
                 // Load the contents of ACC into IX
-                this.registers.IX.setVal(this.registers.ACC.getVal());
+                this.registers.IX.setValue(this.registers.ACC.getValue());
                 break;
             }
             case MNEMONIC_DATA_MOVE.MOV: {
                 // Move the contents of a register to IX
                 const registerName = getRegName(instruction.operand);
-                this.registers.IX.setVal((this.registers as any)[registerName].getVal());
+                this.registers.IX.setValue((this.registers as any)[registerName].getValue());
                 break;
             }
             case MNEMONIC_DATA_MOVE.STO: {
                 // Store the contents of ACC into the specified address (direct/absolute addressing)
-                this.setMemory(instruction.operand, this.registers.ACC.getVal());
+                this.setMemory(instruction.operand, this.registers.ACC.getValue());
                 break;
             }
 
             // Input/Output
             case MNEMONIC_IO.IN: {
                 // Key in a character and store its ASCII value in ACC
-                this.registers.ACC.setVal(await this.inputDevice());
+                this.registers.ACC.setValue(await this.inputDevice());
                 break;
             }
             case MNEMONIC_IO.OUT: {
                 // Output to the screen the character whose ASCII value is stored in ACC
-                this.outputDevice(this.registers.ACC.getVal());
+                this.outputDevice(this.registers.ACC.getValue());
                 break;
             }
 
             // Arithmetic
             case MNEMONIC_ARITHMETIC.ADD_ADDRESS: {
                 // Add the contents of the specified address to ACC (direct/absolute addressing)
-                this.registers.ACC.setVal(this.registers.ACC.getVal() + this.readMemory(instruction.operand));
+                this.registers.ACC.setValue(this.registers.ACC.getValue() + this.readMemory(instruction.operand));
                 break;
             }
             case MNEMONIC_ARITHMETIC.ADD_IMMEDIATE: {
                 // Add the denary number n to ACC (immediate addressing)
-                this.registers.ACC.setVal(this.registers.ACC.getVal() + instruction.operand);
+                this.registers.ACC.setValue(this.registers.ACC.getValue() + instruction.operand);
                 break;
             }
             case MNEMONIC_ARITHMETIC.SUB_ADDRESS: {
                 // Subtract the contents of the specified address from ACC
-                this.registers.ACC.setVal(this.registers.ACC.getVal() - this.readMemory(instruction.operand));
+                this.registers.ACC.setValue(this.registers.ACC.getValue() - this.readMemory(instruction.operand));
                 break;
             }
             case MNEMONIC_ARITHMETIC.SUB_IMMEDIATE: {
                 // Subtract the number n from ACC (immediate addressing)
-                this.registers.ACC.setVal(this.registers.ACC.getVal() - instruction.operand);
+                this.registers.ACC.setValue(this.registers.ACC.getValue() - instruction.operand);
                 break;
             }
             case MNEMONIC_ARITHMETIC.DEC: {
                 // Decrement the contents of ACC
-                this.registers.ACC.setVal(this.registers.ACC.getVal() - 1);
+                this.registers.ACC.setValue(this.registers.ACC.getValue() - 1);
                 break;
             }
             case MNEMONIC_ARITHMETIC.INC: {
                 // Increment the contents of ACC
                 const register = getRegName(instruction.operand);
-                (this.registers as any)[register].setVal((this.registers as any)[register].getVal() + 1);
+                (this.registers as any)[register].increaseBy(1);
                 break;
             }
 
             // Branching
             case MNEMONIC_BRANCHING.JMP: {
                 // Jump to the specified address
-                flagJumped = true;
-                this.registers.PC.setVal(instruction.operand);
+                this.jumped = true;
+                this.registers.PC.setValue(instruction.operand);
                 break;
             }
 
             case MNEMONIC_BRANCHING.JPE: {
                 // Jump to the specified address if comparison is True
                 if (this.isCMPSuccessful()) {
-                    flagJumped = true;
-                    this.registers.PC.setVal(instruction.operand);
+                    this.jumped = true;
+                    this.registers.PC.setValue(instruction.operand);
                 }
                 break;
             }
             case MNEMONIC_BRANCHING.JPN: {
                 // Jump to the specified address if comparison is False
                 if (!this.isCMPSuccessful()) {
-                    flagJumped = true;
-                    this.registers.PC.setVal(instruction.operand);
+                    this.jumped = true;
+                    this.registers.PC.setValue(instruction.operand);
                 }
                 break;
             }
@@ -376,8 +417,8 @@ export class machine {
                 // Jump to the specified address (relative) if comparison is True
 
                 if (this.isCMPSuccessful()) {
-                    flagJumped = true;
-                    this.registers.PC.setVal(this.registers.PC.getVal() + instruction.operand);
+                    this.jumped = true;
+                    this.registers.PC.increaseBy(instruction.operand);
                 }
                 break;
             }
@@ -393,21 +434,21 @@ export class machine {
             // Comparison
             case MNEMONIC_COMPARE.CMP_ADDRESS: {
                 // Compare ACC with contents of the specified address (direct/absolute addressing)
-                const val = this.registers.ACC.getVal() - this.readMemory(instruction.operand);
+                const val = this.registers.ACC.getValue() - this.readMemory(instruction.operand);
                 this.setStatusRegisterWithNumber(val);
                 if(this.verbose) console.log("Compare result: " + this.isCMPSuccessful());
                 break;
             }
             case MNEMONIC_COMPARE.CMP_IMMEDIATE: {
                 // Compare ACC with the number n (immediate addressing)
-                const val = this.registers.ACC.getVal() - instruction.operand;
+                const val = this.registers.ACC.getValue() - instruction.operand;
                 this.setStatusRegisterWithNumber(val);
                 if(this.verbose) console.log("Compare result: " + this.isCMPSuccessful());
                 break;
             }
             case MNEMONIC_COMPARE.CMI: {
                 // Compare ACC with contents of the contents of the specified address (indirect addressing)
-                const val = this.registers.ACC.getVal() - this.readMemory(this.readMemory(instruction.operand));
+                const val = this.registers.ACC.getValue() - this.readMemory(this.readMemory(instruction.operand));
                 this.setStatusRegisterWithNumber(val);
                 if(this.verbose) console.log("Compare result: " + this.isCMPSuccessful());
                 break;
@@ -420,10 +461,6 @@ export class machine {
             default: {
                 throw new Error("Invalid instruction opcode: 0x" + instruction.opcode.toString(16));
             }
-        }
-
-        if (!flagJumped) {
-            this.registers.PC.setVal(this.registers.PC.getVal() + 2);
         }
     }
 }
