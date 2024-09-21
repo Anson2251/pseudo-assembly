@@ -1,3 +1,5 @@
+import type * as stdType from "std"
+
 /* THIS FILE SHOULD BE RUN IN THE QUICK-JS ENVIRONMENT */
 
 /** **NOTE `std` lib should be EXPLICITLY imported**
@@ -9,7 +11,7 @@
  * 
  * - To avoid tsc import std lib as a dependency, it assumes the `std` lib is already imported
  */
-const std =  (globalThis as any).std as any;
+const std =  (globalThis as any).std as typeof stdType;
 
 import interpreter from './interpreter';
 
@@ -23,7 +25,7 @@ const inputDevice = async () => {
 
 // Function to print output in the specified format
 const outputDevice = async (value: number) => {
-    console.log(`(0x${value.toString(16).padStart(Math.ceil(bits / 4), "0")}, ${value.toString(10)}, 0b${value.toString(2).padStart(bits, "0")})\n`);
+    console.log(`(0x${value.toString(16).padStart(Math.ceil(bits / 4), "0")}, ${value.toString(10)}, 0b${value.toString(2).padStart(bits, "0")}, CHAR: "${String.fromCharCode(value)}")\n`);
 };
 
 const helpMsg = `
@@ -53,8 +55,7 @@ function parseArgs(args: string[]): cliArgs {
         verbose : false
     }
 
-    for (let i = 0; i < args.length; i++) {
-        const arg = args[i];
+    args.forEach((arg, i) => {
         if (arg === '-r' || arg === '--run') {
             parsed.file = args[i+1];
         } else if (arg === '-b' || arg === '--bits') {
@@ -65,7 +66,7 @@ function parseArgs(args: string[]): cliArgs {
             console.log(helpMsg);
             std.exit(0);
         }
-    }
+    });
     
     if (parsed.file === "") {
         console.log('Error: No file specified.\n');
@@ -102,9 +103,9 @@ readFile(file)
         instance.addHandler("input", inputDevice);
         instance.addHandler("output", outputDevice);
 
-        const startTime = (new Date).getTime();
+        const startTime = (new Date()).getTime();
         await instance.interpret(code);
-        console.log(`Time taken: ${(new Date).getTime() - startTime}ms`);
+        console.log(`Time taken: ${(new Date()).getTime() - startTime}ms`);
         std.exit(0);
     })
     .catch((err) => {

@@ -17,7 +17,7 @@ suite('Interpreter-Core-Machine', () => {
         { opcode: 0b00110011, operand: 0b00000000 }
     ]
 
-    vm.verbose = true;
+    vm.verbose = false;
     vm.addDevice("output", outputDevice);
 
     await vm.execute(instructions);

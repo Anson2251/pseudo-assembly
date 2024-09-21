@@ -109,12 +109,24 @@ function parseIntermediateCode(lines: string[][]): intermediateInstructionType[]
     return intermediateCode;
 }
 
+    /**
+     * Retrieves the address of the given label in the intermediate code.
+     *
+     * The address is the number of bytes from the start of the program to the label.
+     * 
+     * An error will be thrown if the label is not found in the intermediate code.
+     *
+     * @throws Error if the label is not found in the intermediate code.
+     * @param intermediateCode The intermediate code to search for the label in.
+     * @param label The label to search for.
+     * @returns The address of the label in the intermediate code.
+     */
 function getLabelAddress(intermediateCode: intermediateInstructionType[], label: string): number {
     let addr = 0;
     
     for(let i = 0; i < intermediateCode.length; i++) {
         if(intermediateCode[i].label.slice(0, -1) === label) {
-            break;
+            return addr;
         }
 
         // for a value, add 1; for an instruction, add 2
@@ -125,7 +137,7 @@ function getLabelAddress(intermediateCode: intermediateInstructionType[], label:
         }
     }
 
-    return addr;
+    throw new Error(`Cannot retrieve the address of label ${label}`);
 }
 
 /**

@@ -1,6 +1,7 @@
 import register, { type RegisterNameType, getRegName } from "./register";
 import { type instructionPieceType, lookUpMnemonic, MNEMONIC_DATA_MOVE, MNEMONIC_IO, MNEMONIC_ARITHMETIC, MNEMONIC_BRANCHING, MNEMONIC_COMPARE } from "./instruction";
 
+import { overflowToBinary, overflowAdd, overflowSubtract, twosComplementToDecimal, decimalToTwosComplement } from "./utils";
 
 export const StatusCodes = {
     "C": 0b00000001, // Carry
@@ -100,12 +101,8 @@ export class machine {
      * @param value The value to set.
      */
     setMemory(address: number, value: number) {
-        let bin = value.toString(2);
-        bin = bin.length > this.bits ? bin.slice(-this.bits) : bin.padStart(this.bits, "0");
-        value = parseInt(bin, 2); // deal with overflow
-        
         this.registers.MAR.setValue(address);
-        this.registers.MDR.setValue(value);
+        this.registers.MDR.setValue(overflowToBinary(value, this.bits));
         this.writeMemory();
     }
 
@@ -242,8 +239,12 @@ export class machine {
         console.log("---MEMORY-BEGIN---")
 
         const keys = Object.keys(this.memory).map(i => parseInt(i)).sort((a, b) => a - b);
-        for (let i = 0; i < keys.length; i += 8) {
-            console.log(`${(Math.floor(i / 8) * 8).toString().padStart(keys.length.toString().length, " ")} | ${keys.slice(i, i + 5).map(val => "0x" + this.memory[val].toString(16).padStart(this.bits / 4, "0") ).join(" ")}`);
+        const padLength = keys[keys.length - 1].toString(16).length;
+        const max = keys[keys.length - 1];
+        for (let i = 0; i < max; i += 8) {
+            const lineNum = (Math.floor(i / 8) * 8).toString(16).padStart(padLength, "0");
+            const lineContent = (new Array(8)).fill(0).map((_, j) => (this.memory[i + j] || 0).toString(16).padStart(this.bits / 4, "0"));
+            console.log(`${lineNum} | ${lineContent.join(" ")}`);
         }
         console.log("----MEMORY-END----")
 
@@ -273,7 +274,7 @@ export class machine {
      * @returns The decoded instruction.
      */
     private fetchDecodeInstruction(address: number): instructionPieceType {
-        if (this.verbose) console.log("Fetching instruction at address", address)
+        if (this.verbose) console.log(`Fetching instruction at address 0x${address.toString(16).padStart(this.bits / 4, "0")}`)
         const decoded: instructionPieceType = {
             opcode: this.readMemory(address),
             operand: this.readMemory(address + 1)
@@ -347,45 +348,50 @@ export class machine {
             // Input/Output
             case MNEMONIC_IO.IN: {
                 // Key in a character and store its ASCII value in ACC
-                this.registers.ACC.setValue(await this.inputDevice());
+                this.registers.ACC.setValue(decimalToTwosComplement(await this.inputDevice(), this.bits));
                 break;
             }
             case MNEMONIC_IO.OUT: {
                 // Output to the screen the character whose ASCII value is stored in ACC
-                this.outputDevice(this.registers.ACC.getValue());
+                this.outputDevice(twosComplementToDecimal(this.registers.ACC.getValue(), this.bits));
                 break;
             }
 
             // Arithmetic
             case MNEMONIC_ARITHMETIC.ADD_ADDRESS: {
-                // Add the contents of the specified address to ACC (direct/absolute addressing)
-                this.registers.ACC.setValue(this.registers.ACC.getValue() + this.readMemory(instruction.operand));
+                // Add the contents of the specified address to ACC
+                const result = overflowAdd(this.registers.ACC.getValue(), this.readMemory(instruction.operand), this.bits);
+                this.registers.ACC.setValue(decimalToTwosComplement(result, this.bits));
                 break;
             }
             case MNEMONIC_ARITHMETIC.ADD_IMMEDIATE: {
-                // Add the denary number n to ACC (immediate addressing)
-                this.registers.ACC.setValue(this.registers.ACC.getValue() + instruction.operand);
+                // Add the denary number n to ACC
+                const result = overflowAdd(this.registers.ACC.getValue(), instruction.operand, this.bits);
+                this.registers.ACC.setValue(decimalToTwosComplement(result, this.bits));
                 break;
             }
             case MNEMONIC_ARITHMETIC.SUB_ADDRESS: {
                 // Subtract the contents of the specified address from ACC
-                this.registers.ACC.setValue(this.registers.ACC.getValue() - this.readMemory(instruction.operand));
+                const result = overflowSubtract(this.registers.ACC.getValue(), this.readMemory(instruction.operand), this.bits);
+                this.registers.ACC.setValue(decimalToTwosComplement(result, this.bits));
                 break;
             }
             case MNEMONIC_ARITHMETIC.SUB_IMMEDIATE: {
                 // Subtract the number n from ACC (immediate addressing)
-                this.registers.ACC.setValue(this.registers.ACC.getValue() - instruction.operand);
+                const result = overflowSubtract(this.registers.ACC.getValue(), instruction.operand, this.bits);
+                this.registers.ACC.setValue(decimalToTwosComplement(result, this.bits));
                 break;
             }
             case MNEMONIC_ARITHMETIC.DEC: {
-                // Decrement the contents of ACC
-                this.registers.ACC.setValue(this.registers.ACC.getValue() - 1);
+                // Decrement the contents of a register
+                const register = getRegName(instruction.operand);
+                ((this.registers as any)[register] as register).decreaseBy(1);
                 break;
             }
             case MNEMONIC_ARITHMETIC.INC: {
-                // Increment the contents of ACC
+                // Increment the contents of a register
                 const register = getRegName(instruction.operand);
-                (this.registers as any)[register].increaseBy(1);
+                ((this.registers as any)[register] as register).increaseBy(1);
                 break;
             }
 

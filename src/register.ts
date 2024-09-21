@@ -1,6 +1,8 @@
 export const RegisterTypes = ["ACC", "CIR", "IX", "MAR", "MDR", "PC"];
 export type RegisterNameType = "ACC" | "CIR" | "IX" | "MAR" | "MDR" | "PC";
 
+import { overflowToBinary, decimalToTwosComplement } from "./utils";
+
 export const getRegID = (reg: RegisterNameType) => {
     const index = RegisterTypes.indexOf(reg);
     if(index < 0) throw new Error("Invalid register name");
@@ -30,18 +32,19 @@ export class register {
     }
 
     setValue(value: number) {
-        let bin = value.toString(2);
-        bin = bin.length > this.bits ? bin.slice(-this.bits) : bin.padStart(this.bits, "0");
-        value = parseInt(bin, 2);
-        this.value = value;
+        this.value = overflowToBinary(value, this.bits);
     }
 
     getValue() {
         return this.value;
     }
 
+    decreaseBy(value: number) {
+        this.setValue(decimalToTwosComplement(overflowToBinary(this.value - value, this.bits), this.bits)); // use the previous implementation to handle the overflow
+    }
+
     increaseBy(value: number) {
-        this.setValue(this.getValue() + value); // use the previous implementation to handle the overflow
+        this.setValue(decimalToTwosComplement(overflowToBinary(this.value + value, this.bits), this.bits)); // use the previous implementation to handle the overflow
     }
 
     /**
