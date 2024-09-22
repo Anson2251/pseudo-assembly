@@ -27,8 +27,12 @@ for (let i = 0; i < argv.length; i++) {
     }
 }
 
+const onError = () => {
+    process.exit(1);
+}
+
 if (target === "qjs") {
-    esbuild.build({
+    const options = {
         entryPoints: ['src/cli-qjs.ts'],
         bundle: true,
         minify: true,
@@ -36,18 +40,29 @@ if (target === "qjs") {
         format: 'esm',
         target: ['es2020'],
         external: ["std"],  // Add std to the external list
-    }).catch(() => process.exit(1));
+    }
+    esbuild.build(options).catch(onError);
+    esbuild.build({
+        ...options,
+        outfile: 'dist/interpreter-qjs.min.mjs',
+        minify: true,
+    }).catch(onError);
 }
 else if (target === "node") {
-    esbuild.build({
+    const options = {
         entryPoints: ['src/cli-node.ts'],
         bundle: true,
-        minify: true,
         outfile: 'dist/interpreter-node.cjs',
         platform: 'node',
         target: ['node16'],
         external: ["readline/promises", "fs/promises"],  // Add std to the external list
-    }).catch(() => process.exit(1));
+    }
+    esbuild.build(options).catch(onError);
+    esbuild.build({
+        ...options,
+        outfile: 'dist/interpreter-node.min.cjs',
+        minify: true,
+    }).catch(onError);
 }
 else {
     console.log("Error: Invalid target specified. (Must be 'qjs' or 'node')");

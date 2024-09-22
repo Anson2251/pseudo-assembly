@@ -29,7 +29,7 @@ compile: build
 	@echo "import * as stdI from 'std';" > $(TEMP_DIR)/interpreter.js
 	@echo "globalThis.std = stdI;" >> $(TEMP_DIR)/interpreter.js
 	@echo "globalThis.compiledEnvironment = true;" >> $(TEMP_DIR)/interpreter.js
-	@cat ./dist/interpreter-qjs.mjs >> $(TEMP_DIR)/interpreter.js
+	@cat ./dist/interpreter-qjs.min.mjs >> $(TEMP_DIR)/interpreter.js
 	@echo "  Compiling via qjsc..."
 	@qjsc -flto -fno-module-loader -o $(TEMP_DIR)/interpreter $(TEMP_DIR)/interpreter.js || { echo "qjsc compilation failed" ; exit 1 ; }
 	@chmod +x $(TEMP_DIR)/interpreter
