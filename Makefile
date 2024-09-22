@@ -16,9 +16,9 @@ clean:
 build: clean
 	@echo "Building interpreter.js..."
 	@echo "  Building for Node.js..."
-	@node ./build-cli.node.cjs || { echo "Node.js build failed" ; exit 1 ; }
+	@node ./build-cli.cjs -t node || { echo "Node.js build failed" ; exit 1 ; }
 	@echo "  Building for qjs..."
-	@node ./build-cli.qjs.cjs || { echo "QuickJS build failed" ; exit 1 ; }
+	@node ./build-cli.cjs -t qjs || { echo "QuickJS build failed" ; exit 1 ; }
 
 # Compile the output using qjsc
 compile: build
