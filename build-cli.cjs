@@ -35,7 +35,6 @@ if (target === "qjs") {
     const options = {
         entryPoints: ['src/cli-qjs.ts'],
         bundle: true,
-        minify: true,
         outfile: 'dist/interpreter-qjs.mjs',
         format: 'esm',
         target: ['es2020'],

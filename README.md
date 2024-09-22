@@ -10,7 +10,7 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
 - [`Make`](https://www.gnu.org/software/make/) (required for bundling & compiling, command `npm run build-only` does not depend on it)
 
-- [`QuickJS`](https://bellard.org/quickjs/) (optional, but required for running the CLI and compiling into an executable)
+- [`QuickJS`](https://bellard.org/quickjs/) (optional, but required for compiling into an executable)
 
     QuickJS is a lightweight JavaScript interpreter written in C, designed for minimal size and fast startup. You can find it in [Fabrice Bellard's repo](https://github.com/bellard/quickjs).
 
