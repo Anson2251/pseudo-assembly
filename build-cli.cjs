@@ -19,7 +19,7 @@ if(argv.includes("--help") || argv.includes("-h")) {
     process.exit(0);
 }
 
-let target = 0;
+let target = "";
 
 for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "-t" || argv[i] === "--target") {
@@ -39,8 +39,6 @@ if (target === "qjs") {
     }).catch(() => process.exit(1));
 }
 else if (target === "node") {
-    const esbuild = require('esbuild');
-
     esbuild.build({
         entryPoints: ['src/cli-node.ts'],
         bundle: true,
