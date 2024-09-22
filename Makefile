@@ -11,20 +11,14 @@ all: clean build compile test
 clean:
 	@echo "Cleaning up..."
 	@rm -rf ./dist
-	@echo "Done"
 
 # Build the TypeScript project
 build: clean
 	@echo "Building interpreter.js..."
-	@mkdir -p $(TEMP_DIR)
-	@echo "  Building TypeScript..."
-	@tsc -p . --outDir "$(TEMP_DIR)" || { echo "TypeScript build failed" ; exit 1 ; }
-	@echo "  Bundling..."
-	@cd $(TEMP_DIR); \
-		npx browserify cli.js -o index.js ; \
-		mv ./index.js ../interpreter.js || { echo "Bundling failed" ; exit 1 ; }
-	@echo "Done"
-	@rm -rf $(TEMP_DIR)
+	@echo "  Building for Node.js..."
+	@node ./build-cli.node.cjs || { echo "Node.js build failed" ; exit 1 ; }
+	@echo "  Building for qjs..."
+	@node ./build-cli.qjs.cjs || { echo "QuickJS build failed" ; exit 1 ; }
 
 # Compile the output using qjsc
 compile: build
@@ -34,13 +28,13 @@ compile: build
 	@touch $(TEMP_DIR)/interpreter.js
 	@echo "import * as stdI from 'std';" > $(TEMP_DIR)/interpreter.js
 	@echo "globalThis.std = stdI;" >> $(TEMP_DIR)/interpreter.js
-	@cat ./dist/interpreter.js >> $(TEMP_DIR)/interpreter.js
+	@echo "globalThis.compiledEnvironment = true;" >> $(TEMP_DIR)/interpreter.js
+	@cat ./dist/interpreter-qjs.mjs >> $(TEMP_DIR)/interpreter.js
 	@echo "  Compiling via qjsc..."
 	@qjsc -flto -fno-module-loader -o $(TEMP_DIR)/interpreter $(TEMP_DIR)/interpreter.js || { echo "qjsc compilation failed" ; exit 1 ; }
 	@chmod +x $(TEMP_DIR)/interpreter
 	@mv $(TEMP_DIR)/interpreter ./dist/interpreter
 	@rm -rf $(TEMP_DIR)
-	@echo "Done"
 
 # Test the compiled output
 test: build
@@ -53,6 +47,3 @@ test: build
 		echo "Test Failed: Expected '$$EXPECTED', but got '$$OUTPUT'"; \
 		exit 1; \
 	fi
-	@echo "Done"
-
-
