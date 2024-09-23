@@ -34,6 +34,7 @@ export function decimalToTwosComplement(decimal: number, bitSize: number) {
  *   the given number.
  */
 export function overflowToBinary(value: number, bits: number): number {
+    if(bits >= 32) throw new Error("OverflowToBinary cannot handle values greater than 32 bits currently.");
     return value & ((1 << bits) - 1);
 }
 
