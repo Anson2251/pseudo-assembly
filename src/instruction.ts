@@ -55,12 +55,32 @@ export const MNEMONIC_COMPARE = {
     "CMI": 0x42             // Compare ACC with contents of the contents of the specified address (indirect addressing)
 };
 
+export const MNEMONIC_BINARY_SHIFT = {
+    "LSL": 0x51, // Logical left-shift the contents of ACC by n places
+    "LSR": 0x52, // Logical right-shift the contents of ACC by n places
+    "ASR": 0x53,  // Arithmetic right-shift the contents of ACC by n places
+    "CSL": 0x54, // Circular left-shift the contents of ACC by n places
+    "CSR": 0x55  // Circular right-shift the contents of ACC by n places
+}
+
+export const MNEMONIC_BIT_MANIPULATION = {
+    "AND_IMMEDIATE": 0x60,  // AND the contents of ACC with the number n
+    "AND_ADDRESS": 0x61,    // AND the contents of ACC with the contents of the specified address
+    "OR_IMMEDIATE": 0x62,   // OR the contents of ACC with the number n
+    "OR_ADDRESS": 0x63,     // OR the contents of ACC with the contents of the specified address
+    "XOR_IMMEDIATE": 0x64,  // XOR the contents of ACC with the number n
+    "XOR_ADDRESS": 0x65,    // XOR the contents of ACC with the contents of the specified address
+    "NOT": 0x66             // NOT the contents of ACC
+}
+
 export const ALL_MNEMONICS = {
     ...MNEMONIC_DATA_MOVE,
     ...MNEMONIC_IO,
     ...MNEMONIC_ARITHMETIC,
     ...MNEMONIC_BRANCHING,
-    ...MNEMONIC_COMPARE
+    ...MNEMONIC_COMPARE,
+    ...MNEMONIC_BINARY_SHIFT,
+    ...MNEMONIC_BIT_MANIPULATION
 }
 
 export function lookUpMnemonic(opcode: number) {

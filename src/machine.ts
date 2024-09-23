@@ -1,7 +1,7 @@
 import register, { type RegisterNameType, getRegName } from "./register";
-import { type instructionPieceType, lookUpMnemonic, MNEMONIC_DATA_MOVE, MNEMONIC_IO, MNEMONIC_ARITHMETIC, MNEMONIC_BRANCHING, MNEMONIC_COMPARE } from "./instruction";
+import { type instructionPieceType, lookUpMnemonic, MNEMONIC_DATA_MOVE, MNEMONIC_IO, MNEMONIC_ARITHMETIC, MNEMONIC_BRANCHING, MNEMONIC_COMPARE, MNEMONIC_BIT_MANIPULATION, MNEMONIC_BINARY_SHIFT } from "./instruction";
 
-import { overflowToBinary, overflowAdd, overflowSubtract, twosComplementToDecimal, decimalToTwosComplement } from "./utils";
+import { overflowToBinary, overflowAdd, overflowSubtract, twosComplementToDecimal, decimalToTwosComplement, logicalLeftShift, logicalRightShift, arithmeticRightShift, cyclicLeftShift, cyclicRightShift } from "./utils";
 
 export const StatusCodes = {
     "C": 0b00000001, // Carry
@@ -429,6 +429,77 @@ export class machine {
                 break;
             }
 
+
+            case MNEMONIC_BINARY_SHIFT.LSL: {
+                const value = this.registers.ACC.getValue();
+                const result = logicalLeftShift(value, instruction.operand);
+                this.registers.ACC.setValue(result);
+                break;
+            }
+
+            case MNEMONIC_BINARY_SHIFT.LSR: {
+                const value = this.registers.ACC.getValue();
+                const result = logicalRightShift(value, instruction.operand);
+                this.registers.ACC.setValue(result);
+                break;
+            }
+
+            case MNEMONIC_BINARY_SHIFT.ASR: {
+                const value = this.registers.ACC.getValue();
+                const result = arithmeticRightShift(value, instruction.operand, this.bits);
+                this.registers.ACC.setValue(result);
+                break;
+            }
+
+            case MNEMONIC_BINARY_SHIFT.CSL: {
+                const value = this.registers.ACC.getValue();
+                const result = cyclicLeftShift(value, instruction.operand, this.bits);
+                this.registers.ACC.setValue(result);
+                break;
+            }
+
+            case MNEMONIC_BINARY_SHIFT.CSR: {
+                const value = this.registers.ACC.getValue();
+                const result = cyclicRightShift(value, instruction.operand, this.bits);
+                this.registers.ACC.setValue(result);
+                break;
+            }
+
+
+            case MNEMONIC_BIT_MANIPULATION.AND_IMMEDIATE: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() & instruction.operand);
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.AND_ADDRESS: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() & this.readMemory(instruction.operand));
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.OR_IMMEDIATE: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() | instruction.operand);
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.OR_ADDRESS: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() | this.readMemory(instruction.operand));
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.XOR_IMMEDIATE: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() ^ instruction.operand);
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.XOR_ADDRESS: {
+                this.registers.ACC.setValue(this.registers.ACC.getValue() ^ this.readMemory(instruction.operand));
+                break;
+            }
+
+            case MNEMONIC_BIT_MANIPULATION.NOT: {
+                this.registers.ACC.setValue(decimalToTwosComplement(~this.registers.ACC.getValue(), this.bits));
+                break;
+            }
 
 
             case MNEMONIC_BRANCHING.END: {

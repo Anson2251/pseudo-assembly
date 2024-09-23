@@ -73,3 +73,74 @@ export function overflowSubtract(a: number, b: number, bits: number): number {
 export function binaryToString(number: number, bits: number) {
     return `0b${overflowToBinary(number, bits).toString(2).padStart(bits, "0")}`
 }
+
+/**
+ * Performs a logical right shift on the given value.
+ *
+ * This is the same as an unsigned right shift, i.e. the sign bit is shifted out.
+ *
+ * @param value The value to shift.
+ * @param shiftBy The number of bits to shift by.
+ * @returns The result of the logical right shift.
+ */
+export function logicalRightShift(value: number, shiftBy: number) {
+    return value >>> shiftBy;
+}
+
+
+/**
+ * Performs a logical left shift on the given value.
+ *
+ * This is the same as an unsigned left shift, i.e. the sign bit is not preserved.
+ *
+ * @param value The value to shift.
+ * @param shiftBy The number of bits to shift by.
+ * @returns The result of the logical left shift.
+ */
+export function logicalLeftShift(value: number, shiftBy: number) {
+    return value << shiftBy;
+}
+
+/**
+ * Performs an arithmetic right shift on the given value.
+ *
+ * This is the same as a signed right shift, i.e. the sign bit is preserved.
+ *
+ * @param value The value to shift.
+ * @param shiftBy The number of bits to shift by.
+ * @returns The result of the arithmetic right shift.
+ */
+export function arithmeticRightShift(value: number, shiftBy: number, bits: number) {
+    const sign = value & (1 << (bits - 1));
+    return (value >> shiftBy) | sign;
+}
+
+/**
+ * Performs a cyclic left shift on the given value.
+ *
+ * The cyclic left shift operation performs a left shift, but instead of
+ * shifting in zeros, it wraps the shifted-out bits around to the right.
+ *
+ * @param value The value to shift.
+ * @param shiftBy The number of bits to shift by.
+ * @param bits The total number of bits in the value.
+ * @returns The result of the cyclic left shift.
+ */
+export function cyclicLeftShift(value: number, shiftBy: number, bits: number) {
+    return (value << shiftBy) | (value >>> (bits - shiftBy));
+}
+
+/**
+ * Performs a cyclic right shift on the given value.
+ *
+ * The cyclic right shift operation performs a right shift, but instead of
+ * shifting in zeros, it wraps the shifted-out bits around to the left.
+ *
+ * @param value The value to shift.
+ * @param shiftBy The number of bits to shift by.
+ * @param bits The total number of bits in the value.
+ * @returns The result of the cyclic right shift.
+ */
+export function cyclicRightShift(value: number, shiftBy: number, bits: number) {
+    return (value >>> shiftBy) | (value << (bits - shiftBy));
+}

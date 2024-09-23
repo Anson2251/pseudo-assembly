@@ -157,7 +157,7 @@ function getLabelAddress(intermediateCode: intermediateInstructionType[], label:
  */
 function resolveOpcode(opcode: string, operand: string): string {
     if(opcode === "LDR" && operand === "ACC") return "LDR_ACC"
-    const abbreviated = ["CMP", "ADD", "SUB"];
+    const abbreviated = ["CMP", "ADD", "SUB", "AND", "OR", "XOR"];
     const valuePrefix = ["B", "#", "&"];
 
     if (abbreviated.includes(opcode)) {

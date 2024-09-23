@@ -46,5 +46,31 @@ suite("Intreperter - Assembler", () => {
     
     await vm.execute(byteCode);
     expect(result).toBe(15);
-  })
+  });
+
+  it("assemble bit manipulation", async () => {
+    const byteCode = assembler(`
+        LDM     B00000011              ; Load number into ACC
+        NOT                            ; 1111 1100
+        LSL     #2                     ; 1111 0000
+        ASR     #2                     ; 1011 0000
+        CSR     #5                     ; 1000 0101
+        CSL     #9                     ; 0000 1011
+        AND     B00000101              ; 0000 0001
+        OR      B00001101              ; 0000 1101
+        XOR     B00000101              ; 0000 1000
+        OUT
+        END
+      `);
+
+    let result = -1;
+    const vm = new machine(16);
+    vm.verbose = false;
+    vm.addDevice("output", async (x) => {
+      result = x;
+    });
+    
+    await vm.execute(byteCode);
+    expect(result).toBe(0b00001000);
+  });
 });
