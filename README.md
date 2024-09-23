@@ -2,6 +2,25 @@
 
 A toy project for running the assembly language examples shown in the *Cambridge International AS and A Levels Computer Science Coursebook (Hodder Education)*.
 
+## Contents
+
+- [Build Instructions](#build-instructions) 
+    - [Prerequisites](#prerequisites)
+    - [Steps](#steps)
+- [Usage](#usage)
+- [Machine Instruction Set Documentation](#machine-instruction-set-documentation)
+    - [Number Representation](#number-representation)
+    - [Register Representation](#register-representation)
+    - [Label Representation](#label-representation)
+    - [Machine Mnemonics](#mnemonics)
+        - [Data Movement](#data-move-mnemonics)
+        - [Input Output](#io-mnemonics)
+        - [Arithmetic](#arithmetic-mnemonics)
+        - [Branching](#branching-mnemonics)
+        - [Comparison](#comparison-mnemonics)
+        - [Binary Shift](#binary-shift-mnemonics)
+        - [Bit Manipulation](#bit-manipulation-mnemonics)
+
 ## Build Instructions
 
 ### Prerequisites
@@ -50,52 +69,126 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
 3. The bundled JavaScript file (or executable) can be found in the `dist/` folder. It should be run in the QuickJS environment.
 
+## Usage
+
+Usage: `interpreter [options] -r <file>`
+
+Options:
+
+| Options | Description |
+|---------|-------------|
+| `-r, --run <file>` | The file to run |
+| `-b, --bits <number>` | The number of bits to use for VM |
+| `-v, --verbose` | Enables verbose mode |
+| `-h, --help` | Prints this message |
+
 ## Machine Instruction Set Documentation
 
-### Data Move Mnemonics
-| Mnemonic | Opcode | Description |
-|----------|--------|-------------|
-| `LDM`    | 0x00   | Load the number into ACC (immediate addressing) |
-| `LDD`    | 0x01   | Load the contents of the specified address into ACC (direct/absolute addressing) |
-| `LDI`    | 0x02   | Load the contents of the contents of the given address into ACC (indirect addressing) |
-| `LDX`    | 0x03   | Load the contents of the calculated address into ACC (indexed addressing) |
-| `LDR`    | 0x04   | Load the number n into IX (immediate addressing is used) |
-| `MOV`    | 0x05   | Move the contents of a register to IX |
-| `STO`    | 0x06   | Store the contents of ACC into the specified address (direct/absolute addressing) |
-| `LDR`    | 0x07   | Operand "`ACC`", (overload) Load the number in the accumulator into IX |
+### Number Representation
 
-### IO Mnemonics
-| Mnemonic | Opcode | Description |
-|----------|--------|-------------|
-| `IN`     | 0x10   | Key in a character and store its ASCII value in ACC |
-| `OUT`    | 0x11   | Output to the screen the character whose ASCII value is stored in ACC |
+- Binary number: `B<binary number>`
 
-### Arithmetic Mnemonics
-| Mnemonic          | Opcode | Description |
-|-------------------|--------|-------------|
-| `ADD`             | 0x20   | Add the contents of the specified address to ACC |
-| `ADD`             | 0x21   | (overload) Add the denary number n to ACC (immediate addressing) |
-| `SUB`             | 0x22   | Subtract the contents of the specified address from ACC |
-| `SUB`             | 0x23   | (overload) Subtract the number n from ACC (immediate addressing) |
-| `INC`             | 0x24   | Add 1 to the contents of the register (ACC or IX) |
-| `DEC`             | 0x25   | Subtract 1 from the contents of the register (ACC or IX) |
+    e.g. `B00000011` represents a 8-bit binary number `3`.
 
-### Branching Mnemonics
-| Mnemonic | Opcode | Description |
-|----------|--------|-------------|
-| `JMP`    | 0x30   | Jump to the specified address |
-| `JPE`    | 0x31   | Jump to the specified address if comparison is True |
-| `JPN`    | 0x32   | Jump to the specified address if comparison is False |
-| `END`    | 0x33   | End the program. Return control to the operating system |
-| `JMR`    | 0x34   | Jump to the address (relative, e.g. 3 ahead/behind) |
+- Decimal number: `#<decimal number>`
 
-### Comparison Mnemonics
-| Mnemonic          | Opcode | Description |
-|-------------------|--------|-------------|
-| `CMP`             | 0x40   | Compare ACC with contents of the specified address (direct/absolute addressing) |
-| `CMP`             | 0x41   | (overload) Compare ACC with the number n (immediate addressing) |
-| `CMI`             | 0x42   | Compare ACC with contents of the contents of the specified address (indirect addressing) |
+    e.g. `#42` represents the number `42`.
+
+- Hexadecimal number: `&<hexadecimal number>`
+
+    e.g. `&2A` represents the number `42`.
+
+### Register Representation
+
+Register: `<code>`
+
+| Register    | Code  |
+|-------------|-------|
+| Accumulator | `ACC` |
+| Current instruction register | `CIR` |
+| Index register | `IX` |
+| Memory address register | `MAR` |
+| Memory data register | `MDR` |
+| Program counter | `PC` |
+
+**Register codes are case-sensitive and reserved.**
+
+### Label Representation
+
+Labels: `<label>:`
+
+e.g. `loop:`
+
+**Labels are case-sensitive.**
+
+### Mnemonics
+
+**Mnemonics are case-sensitive.**
+
+#### Data Move Mnemonics
+| Mnemonic | Opcode | Operand  | Description |
+|----------|--------|----------|-------------|
+| `LDM`    | 0x00   | `<number>` | Load the number into ACC (immediate addressing) |
+| `LDD`    | 0x01   | `<label>`  | Load the contents of the specified address into ACC (direct/absolute addressing) |
+| `LDI`    | 0x02   | `<label>`  | Load the contents of the contents of the given address into ACC (indirect addressing) |
+| `LDX`    | 0x03   | `<label>`  |Load the contents of the calculated address into ACC (indexed addressing) |
+| `LDR`    | 0x04   | `<number>` | Load the number n into IX (immediate addressing is used) |
+| `MOV`    | 0x05   | `<register>` | Move the contents of a register to IX |
+| `STO`    | 0x06   | `<label>` | Store the contents of ACC into the specified address (direct/absolute addressing) |
+| `LDR`    | 0x07   | `ACC` | (overload) Load the number in the accumulator into IX |
+
+#### IO Mnemonics
+| Mnemonic | Opcode | Operand | Description |
+|----------|--------|---------|-------------|
+| `IN`     | 0x10   |    -    | Key in a character and store its ASCII value in ACC |
+| `OUT`    | 0x11   |    -    | Output to the screen the character whose ASCII value is stored in ACC |
+
+#### Arithmetic Mnemonics
+| Mnemonic          | Opcode | Operand | Description |
+|-------------------|--------|---------|------------|
+| `ADD`             | 0x20   | `<number>` | Add the contents of the specified address to ACC |
+| `ADD`             | 0x21   | `<label>` | (overload) Add the denary number n to ACC (immediate addressing) |
+| `SUB`             | 0x22   | `<number>` | Subtract the contents of the specified address from ACC |
+| `SUB`             | 0x23   | `<label>` | (overload) Subtract the number n from ACC (immediate addressing) |
+| `INC`             | 0x24   | `<register>` | Add 1 to the contents of a register |
+| `DEC`             | 0x25   | `<register>` | Subtract 1 from the contents of a register |
+
+#### Branching Mnemonics
+| Mnemonic | Opcode | Operand | Description |
+|----------|--------|---------|------------|
+| `JMP`    | 0x30   | `<label>` | Jump to the specified address |
+| `JPE`    | 0x31   | `<label>` | Jump to the specified address if comparison is True |
+| `JPN`    | 0x32   | `<label>` | Jump to the specified address if comparison is False |
+| `END`    | 0x33   |    -      | End the program. Return control to the operating system |
+| `JMR`    | 0x34   | `<number>` | Jump to the address (relative, e.g. 3 ahead/behind) |
+
+#### Comparison Mnemonics
+| Mnemonic          | Opcode | Operand | Description |
+|-------------------|--------|---------|------------|
+| `CMP`             | 0x40   | `<label>` | Compare ACC with contents of the specified address (direct/absolute addressing) |
+| `CMP`             | 0x41   | `<number>` | (overload) Compare ACC with the number n (immediate addressing) |
+| `CMI`             | 0x42   | `<label>` | Compare ACC with contents of the contents of the specified address (indirect addressing) |
+
+#### Binary Shift Mnemonics
+| Mnemonic | Opcode | Operand | Description |
+|----------|--------|---------|------------|
+| `LSL`    | 0x50   | `<number>` | Logical left-shift the contents of ACC by n places |
+| `LSR`    | 0x51   | `<number>` | Logical right-shift the contents of ACC by n places |
+| `ASR`    | 0x52   | `<number>` | Arithmetic right-shift the contents of ACC by n places |
+| `CSL`    | 0x53   | `<number>` | Circular left-shift the contents of ACC by n places |
+| `CSR`    | 0x54   | `<number>` | Circular right-shift the contents of ACC by n places |
+
+#### Bit Manipulation Mnemonics
+| Mnemonic | Opcode | Operand | Description |
+|----------|--------|---------|-----------|
+| `AND`    | 0x60   | `<number>` | AND the contents of ACC with the number n |
+| `AND`    | 0x61   | `<label>` | (overload) AND the contents of ACC with the contents of the specified address
+| `OR`     | 0x62   | `<number>` | OR the contents of ACC with the number n |
+| `OR`     | 0x63   | `<label>` | OR the contents of ACC with the contents of the specified address |
+| `XOR`    | 0x64   | `<number>`   | XOR the contents of ACC with the number n |
+| `XOR`    | 0x65   | `<label>`   | XOR the contents of ACC with contents of the specified address |
+| `NOT`    | 0x66   |    -    | NOT the contents of the accumulator |
 
 ---
 
-Last update: 2024-09-18
+Last update: 2024-09-23

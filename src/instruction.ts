@@ -56,11 +56,11 @@ export const MNEMONIC_COMPARE = {
 };
 
 export const MNEMONIC_BINARY_SHIFT = {
-    "LSL": 0x51, // Logical left-shift the contents of ACC by n places
-    "LSR": 0x52, // Logical right-shift the contents of ACC by n places
-    "ASR": 0x53,  // Arithmetic right-shift the contents of ACC by n places
-    "CSL": 0x54, // Circular left-shift the contents of ACC by n places
-    "CSR": 0x55  // Circular right-shift the contents of ACC by n places
+    "LSL": 0x50, // Logical left-shift the contents of ACC by n places
+    "LSR": 0x51, // Logical right-shift the contents of ACC by n places
+    "ASR": 0x52,  // Arithmetic right-shift the contents of ACC by n places
+    "CSL": 0x53, // Circular left-shift the contents of ACC by n places
+    "CSR": 0x54  // Circular right-shift the contents of ACC by n places
 }
 
 export const MNEMONIC_BIT_MANIPULATION = {
