@@ -1,0 +1,56 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        architecture: [x86_64, arm64]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Download QuickJS
+        run: curl https://bellard.org/quickjs/binary_releases/quickjs-cosmo-2024-01-13.zip -o quickjs-cosmo.zip
+        shell: bash
+
+      - name: Extract QuickJS
+        run: |
+            unzip quickjs-cosmo.zip -d ./quickjs
+            export PATH="$(pwd)/quickjs:$PATH"
+        shell: bash
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: make compile
+        shell: bash
+
+      - name: Prepare Compiled binaries
+        run: |
+            mv ./dist/interpreter ./dist/asm-interpreter-core-${{matrix.os}}-${{matrix.architecture}}
+        shell: bash
+
+      - name: Upload compiled binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: interpreter-binaries
+          path: ./dist/asm-interpreter-core-${{matrix.os}}-${{matrix.architecture}}

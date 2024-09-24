@@ -63,7 +63,7 @@ export class interpreter {
     }
 
     addHandler(type: "input", handler: () => Promise<number>): number
-    addHandler(type: "input", handler: (arg: number) => Promise<void>): number
+    addHandler(type: "output", handler: (arg: number) => Promise<void>): number
     addHandler(type: "input" | "output", handler: (arg: number) => Promise<void> | Promise<number>): number {
         const id = this.handlers.length > 0 ? this.handlers[this.handlers.length - 1].id + 1 : 0;
         this.handlers.push({ id: id, type, handler });
