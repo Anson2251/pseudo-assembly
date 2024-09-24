@@ -83,12 +83,12 @@ export class machine {
      * @param device The device to add (a function that takes a number and returns a Promise of void). 
      */
     addDevice(type: "output", device: (value: number) => Promise<void>): void
-    addDevice(type: "input" | "output", device: any) {
+    addDevice(type: "input" | "output", device: (() => Promise<number>) | ((value: number) => Promise<void>)): void {
         if (type === "input") {
-            this.inputDevice = device;
+            this.inputDevice = device as () => Promise<number>;
         }
         if (type === "output") {
-            this.outputDevice = device;
+            this.outputDevice = device as (value: number) => Promise<void>;
         }
     }
 
@@ -336,7 +336,7 @@ export class machine {
             case MNEMONIC_DATA_MOVE.MOV: {
                 // Move the contents of a register to IX
                 const registerName = getRegName(instruction.operand);
-                this.registers.IX.setValue((this.registers as any)[registerName].getValue());
+                this.registers.IX.setValue(((this.registers as any)[registerName] as register).getValue());
                 break;
             }
             case MNEMONIC_DATA_MOVE.STO: {

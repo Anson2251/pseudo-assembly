@@ -202,7 +202,7 @@ function parseOperand(operand: string): number | string {
 
     const prefix = operand[0];
     if (Object.keys(valuePrefix).includes(prefix)) {
-        return parseInt((operand.slice(1) || "0"), (valuePrefix as any)[prefix]);
+        return parseInt((operand.slice(1) || "0"), valuePrefix[prefix as keyof typeof valuePrefix]);
     }
 
     return operand;  // Operand could be a label, which will be resolved later
@@ -244,7 +244,7 @@ function generateMachineCode(intermediateCode: intermediateInstructionType[], la
  */
 function resolveMnemonic(opcode: string): number {
     if(opcode === "") return 0xFF;
-    const code = (ALL_MNEMONICS as any)[opcode];
+    const code = ALL_MNEMONICS[opcode as keyof typeof ALL_MNEMONICS];
     if(code !== undefined) return code;
     else throw new Error(`Invalid opcode ${opcode}`);
 }

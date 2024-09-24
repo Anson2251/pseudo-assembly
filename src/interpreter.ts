@@ -5,7 +5,7 @@ import { type instructionPieceType } from "./instruction";
 type handler = {
     id: number,
     type: "input" | "output",
-    handler: (...args: any[]) => Promise<any>
+    handler: (...args: any[]) => Promise<number | void>
 }
 
 export class interpreter {
@@ -62,13 +62,16 @@ export class interpreter {
         return vm;
     }
 
-    addHandler(type: "input" | "output", handler: (...args: any[]) => Promise<any>) {
+    addHandler(type: "input", handler: () => Promise<number>): number
+    addHandler(type: "input", handler: (arg: number) => Promise<void>): number
+    addHandler(type: "input" | "output", handler: (arg: number) => Promise<void> | Promise<number>): number {
         const id = this.handlers.length > 0 ? this.handlers[this.handlers.length - 1].id + 1 : 0;
         this.handlers.push({ id: id, type, handler });
+        return id;
     }
 
     private async onInput(): Promise<number> {
-        return await this.handlers.filter(handler => handler.type === "input")[0].handler();
+        return await this.handlers.filter(handler => handler.type === "input")[0].handler() as number;
     }
 
     private async onOutput(value: number) {

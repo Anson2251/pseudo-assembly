@@ -6,10 +6,7 @@ import type * as stdType from "std"
  * 
  * - For running in the QuickJS environment, add a `--std` flag
  * 
- * - For compiling to an executable via `qjsc`, add a line "`import * as std from 'std';`" 
- *   at the beginning and mount the `std` lib to the `globalThis`
- * 
- * - To avoid tsc import std lib as a dependency, it assumes the `std` lib is already imported
+ * - esbuild would not compile `import std from "std"` to the top of the file. qjsc cannot recognize this.
  */
 const std =  (globalThis as any).std as typeof stdType;
 

@@ -84,7 +84,7 @@ export const ALL_MNEMONICS = {
 }
 
 export function lookUpMnemonic(opcode: number) {
-    return Object.keys(ALL_MNEMONICS).find((key) => (ALL_MNEMONICS as any)[key] === opcode) || "UNKNOWN";
+    return Object.keys(ALL_MNEMONICS).find((key) => (ALL_MNEMONICS)[key as keyof typeof ALL_MNEMONICS] === opcode) || "UNKNOWN";
 }
 
 export default ALL_MNEMONICS;
