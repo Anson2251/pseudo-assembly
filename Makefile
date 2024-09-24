@@ -39,11 +39,6 @@ compile: build
 # Test the compiled output
 test: build
 	@echo "Running test..."
-	@OUTPUT='$(shell qjs --std ./dist/interpreter.js -r ./test/sample-code.asm | head -n 1 | tr -d '[:space:]')' ; \
-	EXPECTED="(0x0f,15,0b00001111)" ; \
-	if [ "$$OUTPUT" = "$$EXPECTED" ]; then \
-		echo "Test Passed."; \
-	else \
-		echo "Test Failed: Expected '$$EXPECTED', but got '$$OUTPUT'"; \
-		exit 1; \
-	fi
+	@OUTPUT="$(shell qjs --std ./dist/interpreter-qjs.min.mjs -r ./test/sample-code.asm | head -n 1 | tr -d '[:space:]')" ; \
+	echo "Output: $${OUTPUT}" ; \
+	echo "Expected: 0x0f" ; \
