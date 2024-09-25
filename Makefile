@@ -1,5 +1,5 @@
 # Define variables
-TEMP_DIR = ./dist/$(shell date +'%Y%m%d%H%M%S')
+TEMP_DIR = ./temp
 
 # Phony targets to avoid file conflicts
 .PHONY: all build compile test clean

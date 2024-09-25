@@ -1,12 +1,8 @@
-name: Build and Test
+name: Build and Release
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -16,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        architecture: [x86_64, arm64]
+        architecture: [x64, arm64]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
@@ -27,14 +23,12 @@ jobs:
         with:
           node-version: 20
 
-      - name: Download QuickJS
-        run: curl https://bellard.org/quickjs/binary_releases/quickjs-cosmo-2024-01-13.zip -o quickjs-cosmo.zip
-        shell: bash
-
-      - name: Extract QuickJS
+      - name: Setup QuickJS
         run: |
-            unzip quickjs-cosmo.zip -d ./quickjs
-            export PATH="$(pwd)/quickjs:$PATH"
+            curl -LO https://bellard.org/quickjs/quickjs-2024-01-13.tar.xz
+            tar xvf quickjs-2024-01-13.tar.xz
+            cd quickjs-2024-01-13
+            sudo make install -j
         shell: bash
 
       - name: Install dependencies
@@ -44,13 +38,62 @@ jobs:
         run: make compile
         shell: bash
 
-      - name: Prepare Compiled binaries
+      - name: Prepare Compiled Binaries
         run: |
             mv ./dist/interpreter ./dist/asm-interpreter-core-${{matrix.os}}-${{matrix.architecture}}
         shell: bash
 
-      - name: Upload compiled binaries
+      - name: Upload Compiled Binaries
         uses: actions/upload-artifact@v3
         with:
-          name: interpreter-binaries
+          name: asm-interpreter-core-${{matrix.os}}-${{matrix.architecture}}
           path: ./dist/asm-interpreter-core-${{matrix.os}}-${{matrix.architecture}}
+
+      - name: Prepare Compiled JavaScript Files
+        if: ${{ matrix.os == 'macos-latest' && matrix.architecture == 'x64' }}
+        run: |
+            mkdir ./dist/js/
+            mv ./dist/interpreter-node.min.cjs ./dist/js/asm-interpreter-core-node.min.cjs
+            mv ./dist/interpreter-qjs.min.mjs ./dist/js/asm-interpreter-core-qjs.min.mjs
+        shell: bash
+      
+      # only upload one version
+      - name: Upload Compiled JavaScript Files
+        uses: actions/upload-artifact@v3
+        if: ${{ matrix.os == 'macos-latest' && matrix.architecture == 'x64' }}
+        with:
+          name: asm-interpreter-core-js-cli
+          path: ./dist/js
+    
+  upload-release-assets:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        architecture: [x64, arm64]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Download Artifacts (Binary build)
+        uses: actions/download-artifact@v3
+        with:
+          name: asm-interpreter-core-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ./artifacts
+
+      - name: Download Artifacts (JS File)
+        if: ${{ matrix.os == 'macos-latest' && matrix.architecture == 'x64' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: asm-interpreter-core-js-cli
+          path: ./artifacts
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Upload Assets to Release
+        run: gh release upload ${{ github.event.release.tag_name }} ./artifacts/asm-interpreter-core*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
