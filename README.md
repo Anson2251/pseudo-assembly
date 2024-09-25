@@ -35,7 +35,7 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
     Binary builds can be found at the [quickjs-build repo](https://bellard.org/quickjs/binary_releases/).
 
-    > Please note that the executable `quickjs` in the release is equivalent to `qjs`, which is used by this project. You may need to rename it to `qjs` for the Makefile to run properly.
+    > Cosmopolitan binaries are recommanded. (`quickjs-cosmo-...zip`)
 
 ### Steps
 
