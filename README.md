@@ -35,11 +35,12 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
     Binary builds can be found at the [release page](https://bellard.org/quickjs/binary_releases/).
 
-    > Cosmopolitan binaries are recommended. (`quickjs-cosmo-YYYY-MM-DD.zip`).
-    > This type of build can run on `Linux`, `Mac`, `Windows`, `FreeBSD`, `OpenBSD` and `NetBSD` for both `ARM64` and `x86_64` architectures.
+> [!TIP]
+  Cosmopolitan binaries are recommended. (`quickjs-cosmo-YYYY-MM-DD.zip`).
+  This type of build can run on `Linux`, `Mac`, `Windows`, `FreeBSD`, `OpenBSD` and `NetBSD` for both `ARM64` and `x86_64` architectures.
 
-    > [!WARNING]
-    > `qjsc` is not available in the cosmopolitan release, but is available in other releases with OS and architecture specifications. For `ARM64` users, the binary builds can be obtained from the [quickjs-build repo](https://github.com/napi-bindings/quickjs-build/releases).
+> [!WARNING]
+   `qjsc` is not available in the cosmopolitan release, but is available in other releases with OS and architecture specifications. For `ARM64` users, the binary builds can be obtained from the [quickjs-build repo](https://github.com/napi-bindings/quickjs-build/releases).
 
 ### Steps
 
