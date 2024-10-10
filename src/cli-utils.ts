@@ -29,8 +29,8 @@ export const helpMsg = (argv: string[], platform: string) => `
 Usage: ${executedCommand(argv, platform)} [options] -r <file>
 
 Options:
-  -i, --interpret <file>        To interpret the file
-  -a, --assemble <file>    To assemble the given file into the binary version
+  -i, --interpret <file>  To interpret the file
+  -a, --assemble <file>   To assemble the given file into the binary version
   -r, --run <file>        To run the given binary file
   -o, --out <file>        To specify the output file
   -b, --bits <number>     To specify the number of bits to use for VM
