@@ -69,7 +69,7 @@ export function parseArgs(args: string[], platform: string): cliArgs {
         if (arg === '-r' || arg === '--run') {
             parsed.args.file = args[i + 1];
             parsed.args.run = true;
-        } else if (arg === '-c' || arg === '--compile') {
+        } else if (arg === '-a' || arg === '--assemble') {
             parsed.args.file = args[i + 1];
             parsed.args.assemble = true;
         } else if (arg === '-i' || arg === '--interpret') {
@@ -154,14 +154,12 @@ export async function runFile(args: cliArgs, inputDevice: () => Promise<number>,
     const startTime = (new Date()).getTime();
     try {
         await executable.execute(inputDevice, outputDevice);
+        console.log(`Time taken: ${(new Date()).getTime() - startTime}ms`);
         quit(0);
     }
     catch (err) {
         console.log(`Error: ${err}`);
         quit(1);
-    }
-    finally {
-        console.log(`Time taken: ${(new Date()).getTime() - startTime}ms`);
     }
 }
 
