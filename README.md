@@ -76,7 +76,7 @@ A toy project for running the assembly language examples shown in the *Cambridge
 
 ## Usage
 
-Usage: `interpreter [options] -r <file>`
+Usage: `interpreter [options]`
 
 Options:
 
@@ -198,4 +198,4 @@ e.g. `loop:`
 
 ---
 
-Last update: 2024-09-23
+Last update: 2024-10-10
