@@ -80,8 +80,6 @@ Usage: `interpreter [options] -r <file>`
 
 Options:
 
-Usage: qjs [options] -r <file>
-
 | Options | Description |
 |---------|-------------|
 | `-i, --interpret <file>` | To interpret the file |
