@@ -30,10 +30,10 @@ Usage: ${executedCommand(argv, platform)} [options] -r <file>
 
 Options:
   -i, --interpret <file>  To interpret the file
-  -a, --assemble <file>   To assemble the given file into the binary version
+  -a, --assemble <file>   To assemble the given file into the binary version (only 8-bit & 16-bit is supported)
   -r, --run <file>        To run the given binary file
   -o, --out <file>        To specify the output file
-  -b, --bits <number>     To specify the number of bits to use for VM
+  -b, --bits <number>     To specify the number of bits to use for VM (integer, default: 8, and should be greater or equal to 8)
   -v, --verbose           To enable verbose mode
   -h, --help              To print this message
 `.trim();
@@ -67,20 +67,20 @@ export function parseArgs(args: string[], platform: string): cliArgs {
     for (let i = 0; i < args.length; i++) {
         const arg = args[i];
         if (arg === '-r' || arg === '--run') {
-            parsed.args.file = args[i + 1];
+            parsed.args.file = (!args[i + 1].startsWith("-") ? args[i + 1] : "");
             parsed.args.run = true;
         } else if (arg === '-a' || arg === '--assemble') {
-            parsed.args.file = args[i + 1];
+            parsed.args.file = (!args[i + 1].startsWith("-") ? args[i + 1] : "");
             parsed.args.assemble = true;
         } else if (arg === '-i' || arg === '--interpret') {
-            parsed.args.file = args[i + 1];
+            parsed.args.file = (!args[i + 1].startsWith("-") ? args[i + 1] : "");
             parsed.args.interpret = true;
         } else if (arg === '-b' || arg === '--bits') {
-            parsed.args.bits = parseInt(args[i + 1]);
+            parsed.args.bits = (!args[i + 1].startsWith("-") ? parseInt(args[i + 1]) : 0);
         } else if (arg === '-v' || arg === '--verbose') {
             parsed.args.verbose = true;
         } else if(arg === '-o' || arg === '--out') {
-            parsed.args.outFile = args[i + 1];
+            parsed.args.outFile = (!args[i + 1].startsWith("-") ? args[i + 1] : "");
         } else if (arg === '-h' || arg === '--help') {
             console.log(help);
             return parsed;
@@ -113,7 +113,7 @@ export function parseArgs(args: string[], platform: string): cliArgs {
     }
 
     if (parsed.args.bits < 8) {
-        console.log('Error: Bits must be greater than 8.\n');
+        console.log('Error: Bits must be set with flag and be greater or equal to 8.\n');
         return parsed;
     }
 
@@ -149,10 +149,9 @@ export async function interpretFile(args: cliArgs, inputDevice: () => Promise<nu
 
 export async function runFile(args: cliArgs, inputDevice: () => Promise<number>, outputDevice: (value: number) => Promise<void>, readFile: (file: string) => Promise<Uint8Array>, quit: (code: number) => void) {
     const executable = new Executable();
-    await executable.load(args.args.file, readFile);
-
-    const startTime = (new Date()).getTime();
     try {
+        await executable.load(args.args.file, readFile);
+        const startTime = (new Date()).getTime();
         await executable.execute(inputDevice, outputDevice);
         console.log(`Time taken: ${(new Date()).getTime() - startTime}ms`);
         quit(0);
