@@ -80,12 +80,16 @@ Usage: `interpreter [options] -r <file>`
 
 Options:
 
+Usage: qjs [options] -r <file>
+
 | Options | Description |
 |---------|-------------|
-| `-r, --run <file>` | The file to run |
-| `-b, --bits <number>` | The number of bits to use for VM |
-| `-v, --verbose` | Enables verbose mode |
-| `-h, --help` | Prints this message |
+| `-i, --interpret <file>` | To interpret the file |
+| `-a, --assemble <file>` | To assemble the given file into the binary version |
+| `-r, --run <file>` | To run the given binary file |
+| `-o, --out <file>` | To specify the output file |
+| `-b, --bits <number>` | To specify the number of bits to use for VM |
+| `-v, --verbose` | To enable verbose mode |
 
 ## Machine Instruction Set Documentation
 
@@ -189,9 +193,9 @@ e.g. `loop:`
 | `AND`    | 0x60   | `<number>` | AND the contents of ACC with the number n |
 | `AND`    | 0x61   | `<label>` | (overload) AND the contents of ACC with the contents of the specified address
 | `OR`     | 0x62   | `<number>` | OR the contents of ACC with the number n |
-| `OR`     | 0x63   | `<label>` | OR the contents of ACC with the contents of the specified address |
+| `OR`     | 0x63   | `<label>` | (overload) OR the contents of ACC with the contents of the specified address |
 | `XOR`    | 0x64   | `<number>`   | XOR the contents of ACC with the number n |
-| `XOR`    | 0x65   | `<label>`   | XOR the contents of ACC with contents of the specified address |
+| `XOR`    | 0x65   | `<label>`   | (overload) XOR the contents of ACC with contents of the specified address |
 | `NOT`    | 0x66   |    -    | NOT the contents of the accumulator |
 
 ---

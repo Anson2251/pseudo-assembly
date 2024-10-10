@@ -1,5 +1,5 @@
 import register, { type RegisterNameType, getRegName } from "./register";
-import { type instructionPieceType, lookUpMnemonic, MNEMONIC_DATA_MOVE, MNEMONIC_IO, MNEMONIC_ARITHMETIC, MNEMONIC_BRANCHING, MNEMONIC_COMPARE, MNEMONIC_BIT_MANIPULATION, MNEMONIC_BINARY_SHIFT } from "./instruction";
+import { type InstructionPieceType, lookUpMnemonic, MNEMONIC_DATA_MOVE, MNEMONIC_IO, MNEMONIC_ARITHMETIC, MNEMONIC_BRANCHING, MNEMONIC_COMPARE, MNEMONIC_BIT_MANIPULATION, MNEMONIC_BINARY_SHIFT } from "./instruction";
 
 import { overflowToBinary, overflowAdd, overflowSubtract, twosComplementToDecimal, decimalToTwosComplement, logicalLeftShift, logicalRightShift, arithmeticRightShift, cyclicLeftShift, cyclicRightShift } from "./utils";
 
@@ -19,7 +19,7 @@ export class machine {
     private inputDevice: () => Promise<number>
     private outputDevice: (value: number) => Promise<void>
     verbose: boolean = false
-    private sp: {
+    private sr: {
         /** Carry */
         c: number,
         /** Negative */
@@ -49,7 +49,7 @@ export class machine {
         }
         this.bits = bits;
 
-        this.sp = {
+        this.sr = {
             c: 0,
             n: 0,
             o: 0,
@@ -147,8 +147,8 @@ export class machine {
      * @param field The field to set.
      * @param value The value to set it to.
      */
-    private setStatusRegister(field: keyof typeof this.sp, value: number) {
-        this.sp[field] = value;
+    private setStatusRegister(field: keyof typeof this.sr, value: number) {
+        this.sr[field] = value;
     }
 
     /**
@@ -158,7 +158,7 @@ export class machine {
      * @returns True if the CMP result is successful.
      */
     private isCMPSuccessful() {
-        return this.sp.c === 0 && this.sp.n === 0 && this.sp.z === 1;
+        return this.sr.c === 0 && this.sr.n === 0 && this.sr.z === 1;
     }
 
     /**
@@ -195,9 +195,9 @@ export class machine {
      * 
      * Will execute all instructions in the given array. (Simulate FDE cycle until an `END` instruction is reached.)
      * 
-     * @param instructions The instructions to execute, as an array of {@link instructionPieceType} objects.
+     * @param instructions The instructions to execute, as an array of {@link InstructionPieceType} objects.
      */
-    async execute(instructions: instructionPieceType[]) {
+    async execute(instructions: InstructionPieceType[]) {
         let cursor = 0;
         instructions.forEach((instruction) => {
             if (instruction.opcode !== 0xFF) {
@@ -261,7 +261,7 @@ export class machine {
      * @param address The address to store the instruction at.
      * @param instruction The instruction to store.
      */
-    storeInstructionInMemory(address: number, instruction: instructionPieceType) {
+    storeInstructionInMemory(address: number, instruction: InstructionPieceType) {
         this.setMemory(address, instruction.opcode);
         this.setMemory(address + 1, instruction.operand);
     }
@@ -273,9 +273,9 @@ export class machine {
      * @param address The address of the instruction to fetch and decode.
      * @returns The decoded instruction.
      */
-    private fetchDecodeInstruction(address: number): instructionPieceType {
+    private fetchDecodeInstruction(address: number): InstructionPieceType {
         if (this.verbose) console.log(`Fetching instruction at address 0x${address.toString(16).padStart(this.bits / 4, "0")}`)
-        const decoded: instructionPieceType = {
+        const decoded: InstructionPieceType = {
             opcode: this.readMemory(address),
             operand: this.readMemory(address + 1)
         }

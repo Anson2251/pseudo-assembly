@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import readline from 'readline/promises';
-import { parseArgs, executeFile } from "./cli-utils";
+import { parseArgs, interpretFile, runFile, compileFile } from "./cli-utils";
 
 // Function to read from stdin synchronously in QuickJS
 const inputDevice = async () => {
@@ -20,6 +20,12 @@ function readFile(path: string): Promise<string> {
     return fs.readFile(path, 'utf-8');
 }
 
+async function readFileBin(path: string): Promise<Uint8Array> {
+    return new Uint8Array(await fs.readFile(path));
+}
+
 const args = parseArgs(process.argv, "node");
 if(!args.status) process.exit(1);
-executeFile(args, inputDevice, outputDevice, readFile, process.exit);
+if(args.args.interpret) interpretFile(args, inputDevice, outputDevice, readFile, process.exit);
+if(args.args.assemble) compileFile(args, readFile, fs.writeFile, process.exit);
+if(args.args.run) runFile(args, inputDevice, outputDevice, readFileBin, process.exit);

@@ -1,6 +1,6 @@
 import { RegisterTypes } from "./register";
 
-import { type intermediateInstructionType, type instructionPieceType, ALL_MNEMONICS} from "./instruction";
+import { type IntermediateInstructionType, type InstructionPieceType, ALL_MNEMONICS} from "./instruction";
 
 /**
  * Assembles the given assembly language code into machine code.
@@ -84,8 +84,8 @@ function isLabel(token: string): boolean {
  * @param lines The preprocessed assembly language code.
  * @returns An array of intermediate instructions.
  */
-function parseIntermediateCode(lines: string[][]): intermediateInstructionType[] {
-    const intermediateCode: intermediateInstructionType[] = [];
+function parseIntermediateCode(lines: string[][]): IntermediateInstructionType[] {
+    const intermediateCode: IntermediateInstructionType[] = [];
 
     let haveEnd = false;
 
@@ -99,7 +99,7 @@ function parseIntermediateCode(lines: string[][]): intermediateInstructionType[]
             line[1] = "";
         }
 
-        const instruction: intermediateInstructionType = {
+        const instruction: IntermediateInstructionType = {
             label: line[0],
             opcode: resolveOpcode(line[1], line[2]),
             operand: parseOperand(line[2])
@@ -131,7 +131,7 @@ function parseIntermediateCode(lines: string[][]): intermediateInstructionType[]
      * @param label The label to search for.
      * @returns The address of the label in the intermediate code.
      */
-function getLabelAddress(intermediateCode: intermediateInstructionType[], label: string): number {
+function getLabelAddress(intermediateCode: IntermediateInstructionType[], label: string): number {
     let addr = 0;
     
     for(let i = 0; i < intermediateCode.length; i++) {
@@ -217,7 +217,7 @@ function parseOperand(operand: string): number | string {
  * @param labels The labels and their corresponding instruction indices.
  * @returns The generated machine code.
  */
-function generateMachineCode(intermediateCode: intermediateInstructionType[], labels: string[]): instructionPieceType[] {
+function generateMachineCode(intermediateCode: IntermediateInstructionType[], labels: string[]): InstructionPieceType[] {
     const labelMap = labels.map(label => ({ label, index: getLabelAddress(intermediateCode, label) }))
         .reduce((acc, label) => {
             acc[label.label] = label.index;
@@ -225,7 +225,7 @@ function generateMachineCode(intermediateCode: intermediateInstructionType[], la
         }, {} as Record<string, number>);
     
     return intermediateCode.map(instruction => {
-        const newInstruction: instructionPieceType = {
+        const newInstruction: InstructionPieceType = {
             opcode: resolveMnemonic(instruction.opcode),
             operand: resolveOperand(instruction.operand, labelMap)
         };

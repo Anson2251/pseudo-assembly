@@ -1,9 +1,9 @@
-export type instructionPieceType = {
+export type InstructionPieceType = {
     opcode: number,
     operand: number
 }
 
-export type intermediateInstructionType = {
+export type IntermediateInstructionType = {
     label: string,
     opcode: string,
     operand: string | number

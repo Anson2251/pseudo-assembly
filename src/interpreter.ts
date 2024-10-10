@@ -1,6 +1,6 @@
 import machine from "./machine";
 import assembler from "./assembler";
-import { type instructionPieceType } from "./instruction";
+import { type InstructionPieceType } from "./instruction";
 
 type handler = {
     id: number,
@@ -20,7 +20,7 @@ export class interpreter {
     }
 
     assemble(code: string) {
-        return new Promise<instructionPieceType[]>((resolve, reject) => {
+        return new Promise<InstructionPieceType[]>((resolve, reject) => {
             try {
                 resolve(assembler(code));
             }
@@ -45,6 +45,10 @@ export class interpreter {
                 reject(err);
             }
         });
+    }
+
+    execute(instructions: InstructionPieceType[]) {
+        return this.vm.execute(instructions);
     }
 
     changeBits(bits: number) {
