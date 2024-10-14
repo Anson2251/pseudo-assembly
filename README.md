@@ -1,4 +1,4 @@
-# Assembly Interpreter (Core)
+# Pseudo-Assembly
 
 A toy project for running the assembly language examples shown in the *Cambridge International AS and A Levels Computer Science Coursebook (Hodder Education)*.
 
