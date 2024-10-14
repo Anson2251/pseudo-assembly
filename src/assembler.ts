@@ -87,8 +87,6 @@ function isLabel(token: string): boolean {
 function parseIntermediateCode(lines: string[][]): IntermediateInstructionType[] {
     const intermediateCode: IntermediateInstructionType[] = [];
 
-    let haveEnd = false;
-
     for (const line of lines) {
         if (!isLabel(line[0])) {
             line.unshift("");  // If no label, add an empty string to keep line structure consistent
@@ -106,14 +104,6 @@ function parseIntermediateCode(lines: string[][]): IntermediateInstructionType[]
         };
 
         intermediateCode.push(instruction);
-
-        if(line[1] === "END") {
-            haveEnd = true;
-        }
-    }
-
-    if(!haveEnd) {
-        throw new Error("Missing END instruction");
     }
 
     return intermediateCode;
