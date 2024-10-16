@@ -192,6 +192,9 @@ function parseOperand(operand: string): number | string {
 
     const prefix = operand[0];
     if (Object.keys(valuePrefix).includes(prefix)) {
+        if(prefix === "#" && !/^#[0-9]+$/g.test(operand)) throw new Error(`Invalid number representation of ${operand} with base 10`);
+        if(prefix === "&" && !/^&[0-9A-Fa-f]+$/g.test(operand)) throw new Error(`Invalid number representation of ${operand} with base 16`);
+        if(prefix === "B" && !/^B[01]+$/.test(operand)) throw new Error(`Invalid number representation of ${operand} with base 2`);
         return parseInt((operand.slice(1) || "0"), valuePrefix[prefix as keyof typeof valuePrefix]);
     }
 
