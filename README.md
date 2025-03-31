@@ -119,6 +119,8 @@ Register: `<code>`
 | Memory data register | `MDR` |
 | Program counter | `PC` |
 
+**Register codes are case-sensitive and reserved.**
+
 ### Comparisons
 
 Comparisons are performed using comparison commands (`CMP`, `CMI`). 
@@ -128,8 +130,6 @@ A comparison is deemed successful if all three conditions are met:
 - the carry flag is not set
 - the negative flag is not set
 - the zero flag is set (indicating the two values are equal).
-
-**Register codes are case-sensitive and reserved.**
 
 ### Label Representation
 
