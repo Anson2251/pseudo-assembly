@@ -12,6 +12,7 @@ A toy project for running the assembly language examples shown in the *Cambridge
     - [Number Representation](#number-representation)
     - [Register Representation](#register-representation)
     - [Label Representation](#label-representation)
+    - [Comparisons](#comparisons)
     - [Machine Mnemonics](#mnemonics)
         - [Data Movement](#data-move-mnemonics)
         - [Input Output](#io-mnemonics)
@@ -118,7 +119,7 @@ Register: `<code>`
 | Memory data register | `MDR` |
 | Program counter | `PC` |
 
-### Comparison
+### Comparisons
 
 Comparisons are performed using comparison commands (`CMP`, `CMI`). 
 
